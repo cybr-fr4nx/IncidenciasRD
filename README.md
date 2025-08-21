@@ -49,4 +49,4 @@ incidencias-rd/
 
 ---
 
-Desarrollado por cybr-fr4nx y colaboradores. Para soporte o sugerencias, abre un issue o contacta al admin.
+Desarrollado por cybr-fr4nx.
