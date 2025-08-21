@@ -79,6 +79,8 @@ $page_title = 'Validar Incidencias';
                                     <button type="submit" name="estado" value="rechazada"
                                         class="btn btn-danger btn-sm">Rechazar</button>
                                 </form>
+                                <button class="btn btn-danger btn-sm btn-eliminar"
+                                    data-id="<?= $inc['id_incidencia'] ?>">Eliminar</button>
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -91,8 +93,23 @@ $page_title = 'Validar Incidencias';
             </table>
         </div>
 
-        <h3 class="mt-5">Mapa de todas las incidencias</h3>
-        <div id="mapa" class="rounded shadow mb-4" style="height: 450px;"></div>
+        <h3 class="mt-5">Gestión de todas las incidencias</h3>
+        <div class="table-responsive">
+            <table class="table table-bordered" id="tabla-gestion-incidencias">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Título</th>
+                        <th>Descripción</th>
+                        <th>Estado</th>
+                        <th>Reportero</th>
+                        <th>Fecha</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
     </main>
 
     <!-- Modal para detalles -->
@@ -167,6 +184,89 @@ $page_title = 'Validar Incidencias';
 
             cargarIncidencias();
             setInterval(cargarIncidencias, 30000); // Actualizar cada 30 segundos
+        });
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // --- Gestión de incidencias (admin/validador) ---
+            function cargarTablaGestion() {
+                fetch("<?= $basePath ?>/api/manage_incidents.php")
+                    .then(r => r.json())
+                    .then(data => {
+                        const tbody = document.querySelector('#tabla-gestion-incidencias tbody');
+                        tbody.innerHTML = '';
+                        data.forEach(inc => {
+                            tbody.innerHTML += `
+                                <tr>
+                                    <td>${inc.id_incidencia}</td>
+                                    <td><input type="text" class="form-control form-control-sm" value="${inc.titulo}" data-field="titulo"></td>
+                                    <td><input type="text" class="form-control form-control-sm" value="${inc.descripcion}" data-field="descripcion"></td>
+                                    <td>
+                                        <select class="form-select form-select-sm" data-field="estado">
+                                            <option value="pendiente" ${inc.estado === 'pendiente' ? 'selected' : ''}>Pendiente</option>
+                                            <option value="validada" ${inc.estado === 'validada' ? 'selected' : ''}>Validada</option>
+                                            <option value="rechazada" ${inc.estado === 'rechazada' ? 'selected' : ''}>Rechazada</option>
+                                        </select>
+                                    </td>
+                                    <td>${inc.reportero}</td>
+                                    <td>${inc.fecha_registro}</td>
+                                    <td>
+                                        <button class="btn btn-primary btn-sm btn-guardar" data-id="${inc.id_incidencia}">Guardar</button>
+                                        <button class="btn btn-danger btn-sm btn-eliminar" data-id="${inc.id_incidencia}">Eliminar</button>
+                                    </td>
+                                </tr>
+                            `;
+                        });
+                    });
+            }
+            cargarTablaGestion();
+
+            // Guardar cambios
+            document.addEventListener('click', function (e) {
+                if (e.target.classList.contains('btn-guardar')) {
+                    const tr = e.target.closest('tr');
+                    const id = e.target.dataset.id;
+                    const titulo = tr.querySelector('[data-field="titulo"]').value;
+                    const descripcion = tr.querySelector('[data-field="descripcion"]').value;
+                    const estado = tr.querySelector('[data-field="estado"]').value;
+                    fetch("<?= $basePath ?>/api/manage_incidents.php", {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: new URLSearchParams({
+                            action: 'edit',
+                            id_incidencia: id,
+                            titulo,
+                            descripcion,
+                            estado
+                        })
+                    }).then(r => r.json()).then(resp => {
+                        if (resp.success) {
+                            cargarTablaGestion();
+                        } else {
+                            alert('Error al guardar: ' + (resp.error || ''));
+                        }
+                    });
+                }
+                // Eliminar
+                if (e.target.classList.contains('btn-eliminar')) {
+                    if (!confirm('¿Seguro que deseas eliminar esta incidencia?')) return;
+                    const id = e.target.dataset.id;
+                    fetch("<?= $basePath ?>/api/manage_incidents.php", {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: new URLSearchParams({
+                            action: 'delete',
+                            id_incidencia: id
+                        })
+                    }).then(r => r.json()).then(resp => {
+                        if (resp.success) {
+                            cargarTablaGestion();
+                        } else {
+                            alert('Error al eliminar: ' + (resp.error || ''));
+                        }
+                    });
+                }
+            });
         });
     </script>
 </body>

@@ -1,6 +1,4 @@
 <?php
-// Archivo: includes/db.php
-
 $host = 'localhost'; 
 $db   = 'incidencias2_rd';
 $user = 'root'; 
@@ -20,7 +18,7 @@ $options = [
 try {
      $pdo = new PDO($dsn, $user, $pass, $options);
 } catch (\PDOException $e) {
-     // En un entorno de produccion, no mostrarias el error detallado
+     
      http_response_code(500);
      echo json_encode(['error' => 'Error de conexión a la base de datos.']);
      // throw new \PDOException($e->getMessage(), (int)$e->getCode());

@@ -1,0 +1,119 @@
+-- Crear la base de datos
+CREATE DATABASE IF NOT EXISTS incidencias_rd DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE incidencias_rd;
+
+-- Provincia
+CREATE TABLE Provincia (
+  id_provincia INT AUTO_INCREMENT PRIMARY KEY,
+  nombre VARCHAR(100) NOT NULL UNIQUE
+) ENGINE=InnoDB;
+
+-- Municipio
+CREATE TABLE Municipio (
+  id_municipio INT AUTO_INCREMENT PRIMARY KEY,
+  nombre VARCHAR(100) NOT NULL,
+  id_provincia INT NOT NULL,
+  FOREIGN KEY (id_provincia) REFERENCES Provincia(id_provincia) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Barrio
+CREATE TABLE Barrio (
+  id_barrio INT AUTO_INCREMENT PRIMARY KEY,
+  nombre VARCHAR(100) NOT NULL,
+  id_municipio INT NOT NULL,
+  FOREIGN KEY (id_municipio) REFERENCES Municipio(id_municipio) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Usuario
+CREATE TABLE Usuario (
+  id_usuario INT AUTO_INCREMENT PRIMARY KEY,
+  nombre VARCHAR(150) NOT NULL,
+  correo VARCHAR(150) NOT NULL UNIQUE,
+  tipo_usuario ENUM('reportero', 'validador') NOT NULL,
+  autenticacion ENUM('Gmail', 'Office 365', 'tradicional') NOT NULL,
+  clave VARCHAR(255) NULL
+) ENGINE=InnoDB;
+
+-- Tipo_Incidencia
+CREATE TABLE Tipo_Incidencia (
+  id_tipo INT AUTO_INCREMENT PRIMARY KEY,
+  nombre VARCHAR(100) NOT NULL UNIQUE,
+  icono_url VARCHAR(255) NULL
+) ENGINE=InnoDB;
+
+-- Incidencia
+CREATE TABLE Incidencia (
+  id_incidencia INT AUTO_INCREMENT PRIMARY KEY,
+  fecha_ocurrencia DATETIME NOT NULL,
+  titulo VARCHAR(255) NOT NULL,
+  descripcion TEXT NOT NULL,
+  latitud DECIMAL(10, 8) NOT NULL,
+  longitud DECIMAL(11, 8) NOT NULL,
+  muertos INT DEFAULT 0,
+  heridos INT DEFAULT 0,
+  perdida_estimada DECIMAL(15, 2) DEFAULT 0.00,
+  link_redes VARCHAR(255) NULL,
+  foto_url VARCHAR(255) NULL,
+  id_provincia INT NOT NULL,
+  id_municipio INT NOT NULL,
+  id_barrio INT NOT NULL,
+  id_usuario INT NOT NULL,
+  estado ENUM('pendiente', 'validada', 'rechazada', 'fusionada') NOT NULL DEFAULT 'pendiente',
+  fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (id_provincia) REFERENCES Provincia(id_provincia),
+  FOREIGN KEY (id_municipio) REFERENCES Municipio(id_municipio),
+  FOREIGN KEY (id_barrio) REFERENCES Barrio(id_barrio),
+  FOREIGN KEY (id_usuario) REFERENCES Usuario(id_usuario)
+) ENGINE=InnoDB;
+
+-- Tabla de relacion de muchos a muchos para Incidencia y Tipo_Incidencia
+CREATE TABLE Incidencia_Tipo (
+  id_incidencia INT NOT NULL,
+  id_tipo INT NOT NULL,
+  PRIMARY KEY (id_incidencia, id_tipo),
+  FOREIGN KEY (id_incidencia) REFERENCES Incidencia(id_incidencia) ON DELETE CASCADE,
+  FOREIGN KEY (id_tipo) REFERENCES Tipo_Incidencia(id_tipo) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- DATOS DE EJEMPLO --
+
+-- Provincias
+INSERT INTO Provincia (id_provincia, nombre) VALUES
+  (1, 'Distrito Nacional'),
+  (2, 'Santiago'),
+  (3, 'Santo Domingo');
+
+-- Municipios
+INSERT INTO Municipio (id_municipio, nombre, id_provincia) VALUES
+  (1, 'Santo Domingo de Guzmán', 1),
+  (2, 'Santiago de los Caballeros', 2),
+  (3, 'Santo Domingo Este', 3);
+
+-- Barrios
+INSERT INTO Barrio (id_barrio, nombre, id_municipio) VALUES
+  (1, 'Piantini', 1),
+  (2, 'Los Jardines Metropolitanos', 2),
+  (3, 'Alma Rosa', 3);
+
+-- Tipos de Incidencia
+INSERT INTO Tipo_Incidencia (id_tipo, nombre, icono_url) VALUES
+  (1, 'Accidente', 'https://cdn-icons-png.flaticon.com/512/3048/3048424.png'),
+  (2, 'Robo', 'https://cdn-icons-png.flaticon.com/512/2830/2830305.png'),
+  (3, 'Pelea', 'https://cdn-icons-png.flaticon.com/512/3436/3436538.png');
+
+-- Usuarios (Contraseña para validador es 'admin123')
+INSERT INTO Usuario (id_usuario, nombre, correo, tipo_usuario, autenticacion, clave) VALUES
+  (1, 'admin Reportero', 'reportero@test.com', 'reportero', 'Gmail', NULL),
+  (2, 'admin Validador', 'validador@test.com', 'validador', 'tradicional', '$2y$10$I0a1.t7.3zJ.V/T5vD3n2u.oK.1Qe.Yg.0i.Z3e.U3e.W5e.O5e.O');
+
+-- Incidencias de Ejemplo
+INSERT INTO Incidencia (id_incidencia, fecha_ocurrencia, titulo, descripcion, latitud, longitud, muertos, heridos, id_provincia, id_municipio, id_barrio, id_usuario, estado) VALUES
+  (1, NOW() - INTERVAL 5 HOUR, 'Accidente en la 27 de Febrero', 'Choque leve entre dos vehículos en la intersección con Av. Lincoln.', 18.4663, -69.9325, 0, 2, 1, 1, 1, 1, 'validada'),
+  (2, NOW() - INTERVAL 1 DAY, 'Asalto en Alma Rosa', 'Reporte de asalto a mano armada en colmado de la zona.', 18.4832, -69.8531, 0, 0, 3, 3, 3, 1, 'validada'),
+  (3, NOW() - INTERVAL 2 HOUR, 'Intento de Robo en Santiago', 'Un individuo intentó sustraer una cartera en la vía pública.', 19.4517, -70.6970, 0, 0, 2, 2, 2, 1, 'pendiente');
+
+-- Relacioon Incidencia-Tipo
+INSERT INTO Incidencia_Tipo (id_incidencia, id_tipo) VALUES
+  (1, 1),
+  (2, 2),
+  (3, 2);

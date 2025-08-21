@@ -7,7 +7,7 @@
 <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
 <script src="<?= isset($basePath) ? $basePath : '' ?>/assets/js/main.js"></script>
 <?php if (isset($extra_js)) {
-    // Reemplaza /assets/ por $basePath/assets/ si es necesario
+    // Reemplazar /assets/ por $basePath/assets/ si es necesario
     echo str_replace('/assets/', (isset($basePath) ? $basePath : '') . '/assets/', $extra_js);
 } ?>
 </body>

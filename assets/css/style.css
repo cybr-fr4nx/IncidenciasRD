@@ -1,15 +1,39 @@
-#mapa { 
-    height: 600px; 
-    width: 100%;
+#mapa,
+#mapa-accidentes {
+  height: 600px;
+  width: 100%;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.13), 0 1.5px 6px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.3s, border-radius 0.3s;
+  background: #f8fafc;
+  border: 1.5px solid #e0e0e0;
+}
+#mapa:hover,
+#mapa-accidentes:hover {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(0, 0, 0, 0.12);
+  border-radius: 22px;
 }
 .leaflet-popup-content-wrapper {
-    border-radius: 5px;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+  border: 1px solid #e0e0e0;
+}
+.leaflet-popup-tip {
+  background: #fff;
+}
+@media (max-width: 768px) {
+  #mapa,
+  #mapa-accidentes {
+    height: 350px;
+    border-radius: 10px;
+  }
 }
 .login-container {
-    max-width: 400px;
-    margin: 5rem auto;
-    padding: 2rem;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  max-width: 400px;
+  margin: 5rem auto;
+  padding: 2rem;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }

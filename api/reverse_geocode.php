@@ -7,7 +7,7 @@ if (!$lat || !$lng) {
     echo json_encode(['error' => 'Parámetros inválidos']);
     exit;
 }
-// Buscar el barrio más cercano (usando distancia euclidiana simple)
+
 $stmt = $pdo->prepare("SELECT b.id_barrio, b.nombre AS barrio, m.id_municipio, m.nombre AS municipio, p.id_provincia, p.nombre AS provincia
 FROM Barrio b
 JOIN Municipio m ON b.id_municipio = m.id_municipio
